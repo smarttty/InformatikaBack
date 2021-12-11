@@ -36,12 +36,12 @@ namespace TestODataBackend.Models
 
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.HasKey(e => e.Primarykey)
+                entity.HasKey(e => e._Primarykey)
                     .HasName("Order_pkey");
 
                 entity.ToTable("Order");
 
-                entity.Property(e => e.Primarykey)
+                entity.Property(e => e._Primarykey)
                     .ValueGeneratedOnAdd()
                     .HasColumnName("primarykey");
 

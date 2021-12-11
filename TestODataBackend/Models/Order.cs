@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNet.OData.Builder;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,7 +10,7 @@ namespace TestODataBackend.Models
     public partial class Order
     {
         [Key]
-        public Guid Primarykey { get; set; }
+        public Guid _Primarykey { get; set; }
         public string Name { get; set; }
         public Guid UserPrimarykey { get; set; }
 

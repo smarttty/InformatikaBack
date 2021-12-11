@@ -30,7 +30,7 @@ namespace TestODataBackend.Controllers
         [EnableQuery]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
         {
-            return await _context.Orders.ToListAsync();
+            return await _context.Orders.Include(x => x.User).ToListAsync();
         }
 
         // GET: odata/Orders/5
@@ -54,7 +54,7 @@ namespace TestODataBackend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOrder(Guid id, Order order)
         {
-            if (id != order.Primarykey)
+            if (id != order._Primarykey)
             {
                 return BadRequest();
             }
@@ -80,6 +80,36 @@ namespace TestODataBackend.Controllers
             return NoContent();
         }
 
+        public async Task<IActionResult> Patch([FromODataUri] Guid key, Delta<Order> order)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var entity = await _context.Orders.FindAsync(key);
+            if (entity == null)
+            {
+                return NotFound();
+            }
+            order.Patch(entity);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!OrderExists(key))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return Updated(entity);
+        }
+
         // POST: api/Orders
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
@@ -94,7 +124,7 @@ namespace TestODataBackend.Controllers
             }
             catch (DbUpdateException)
             {
-                if (OrderExists(order.Primarykey))
+                if (OrderExists(order._Primarykey))
                 {
                     return Conflict();
                 }
@@ -104,7 +134,7 @@ namespace TestODataBackend.Controllers
                 }
             }
 
-            return CreatedAtAction("GetOrder", new { id = order.Primarykey }, order);
+            return CreatedAtAction("GetOrder", new { id = order._Primarykey }, order);
         }
 
         // DELETE: api/Orders/5
@@ -126,7 +156,7 @@ namespace TestODataBackend.Controllers
 
         private bool OrderExists(Guid id)
         {
-            return _context.Orders.Any(e => e.Primarykey == id);
+            return _context.Orders.Any(e => e._Primarykey == id);
         }
     }
 }
